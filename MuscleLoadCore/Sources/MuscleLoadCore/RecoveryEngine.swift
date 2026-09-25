@@ -1,5 +1,8 @@
 import Foundation
 
+/// Three-tier recovery classification, split at recoveryPercent thresholds of
+/// 40% (early/soon) and 85% (soon/ready). These thresholds are spec starting
+/// values subject to calibration, not fixed constants.
 public enum RecoveryStatus: Equatable, Sendable {
     case early
     case soon
@@ -8,6 +11,7 @@ public enum RecoveryStatus: Equatable, Sendable {
 
 public struct MuscleRecoveryStatus: Equatable, Sendable {
     public let muscleGroup: MuscleGroup
+    /// Recovery on a 0-100 scale (not 0-1), where 100 means fully recovered.
     public let recoveryPercent: Double
     public let status: RecoveryStatus
 
@@ -71,7 +75,7 @@ public struct RecoveryEngine: Sendable {
         }
 
         return MuscleGroup.allCases.map { muscle in
-            let load = min(100, currentLoad[muscle] ?? 0)
+            let load = max(0, min(100, currentLoad[muscle] ?? 0))
             let recoveryPercent = 100 - load
             let status: RecoveryStatus
             switch recoveryPercent {

@@ -99,4 +99,25 @@ final class RecoveryEngineRecoveryStatusTests: XCTestCase {
         XCTAssertEqual(quadStatus.recoveryPercent, 100, accuracy: 0.01)
         XCTAssertEqual(quadStatus.status, .ready)
     }
+
+    func test_recoveryStatus_negativeLoadDoesNotExceedOneHundredPercent() {
+        let squat = exercise("barbellSquat")
+        let sessionDate = Date(timeIntervalSince1970: 0)
+        // Pathological negative weight: nothing today constructs a SetEntry
+        // this way, but the type system doesn't prevent it. Negative weight
+        // drives rawLoad negative, which drives momentaryLoad and currentLoad
+        // negative -- an "unloading" that never actually happens physically.
+        let set = SetEntry(exercise: squat, weightKg: -80, reps: 8, setNumber: 1)
+        let session = WorkoutSession(date: sessionDate, sets: [set])
+
+        let statuses = engine.recoveryStatus(asOf: sessionDate, sessions: [session])
+        let quadStatus = statuses.first { $0.muscleGroup == .quadriceps }!
+
+        // currentLoad[quadriceps] is negative here, so after floor-clamping
+        // load to max(0, ...) == 0, recoveryPercent = 100 - 0 = exactly 100.
+        // Without the floor clamp this would exceed 100.
+        XCTAssertEqual(quadStatus.recoveryPercent, 100, accuracy: 0.0001)
+        XCTAssertLessThanOrEqual(quadStatus.recoveryPercent, 100)
+        XCTAssertEqual(quadStatus.status, .ready)
+    }
 }

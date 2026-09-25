@@ -71,6 +71,9 @@ public enum MovementPatternCatalog {
         heavinessCoefficient: 1.5
     )
 
+    /// `secondaryMuscles` is a deliberate union of the spec's two lat-pulldown-grip
+    /// variants: wide grip lists [biceps, shoulders], close grip lists [biceps, forearms].
+    /// Not split into two patterns because both grips share the same 1.3 coefficient.
     public static let verticalPullCable = MovementPattern(
         id: "verticalPullCable",
         name: "Тяга вертикальная (блок)",
