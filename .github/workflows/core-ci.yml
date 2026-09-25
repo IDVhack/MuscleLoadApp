@@ -1,0 +1,19 @@
+name: MuscleLoadCore CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "5.10"
+      - name: Run MuscleLoadCore tests
+        working-directory: MuscleLoadCore
+        run: swift test
