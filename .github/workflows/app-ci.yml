@@ -36,8 +36,18 @@ jobs:
           echo "name=$DEVICE_NAME" >> "$GITHUB_OUTPUT"
       - name: Run MuscleLoadApp tests
         run: |
+          set -o pipefail
           xcodebuild test \
             -project MuscleLoadApp.xcodeproj \
             -scheme MuscleLoadApp \
             -destination "platform=iOS Simulator,name=${{ steps.destination.outputs.name }}" \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee /tmp/xcodebuild.log
+      - name: Publish xcodebuild output summary
+        if: always()
+        run: |
+          {
+            echo '### xcodebuild output (tail)'
+            echo '```'
+            tail -n 150 /tmp/xcodebuild.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
