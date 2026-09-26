@@ -34,4 +34,13 @@ final class ExerciseCatalogTests: XCTestCase {
         XCTAssertNil(squat?.imageAssetName)
         XCTAssertNil(squat?.techniqueDescription)
     }
+
+    func test_exercise_returnsMatchingExerciseByID() {
+        let squat = ExerciseCatalog.exercise(id: "barbellSquat")
+        XCTAssertEqual(squat?.name, "Приседания со штангой")
+    }
+
+    func test_exercise_returnsNilForUnknownID() {
+        XCTAssertNil(ExerciseCatalog.exercise(id: "doesNotExist"))
+    }
 }

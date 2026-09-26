@@ -39,4 +39,14 @@ final class MovementPatternCatalogTests: XCTestCase {
     func test_hipAbduction_hasNoSecondaryMuscles() {
         XCTAssertTrue(MovementPatternCatalog.hipAbduction.secondaryMuscles.isEmpty)
     }
+
+    func test_pattern_returnsMatchingPatternByID() {
+        let squat = MovementPatternCatalog.pattern(id: "squat")
+        XCTAssertEqual(squat?.id, "squat")
+        XCTAssertEqual(squat?.heavinessCoefficient, 1.8)
+    }
+
+    func test_pattern_returnsNilForUnknownID() {
+        XCTAssertNil(MovementPatternCatalog.pattern(id: "doesNotExist"))
+    }
 }

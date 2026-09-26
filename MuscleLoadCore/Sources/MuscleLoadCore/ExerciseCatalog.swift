@@ -24,4 +24,8 @@ public enum ExerciseCatalog {
         Exercise(id: "hyperextension", name: "Гиперэкстензия", movementPattern: MovementPatternCatalog.backExtension, isBuiltIn: true),
         Exercise(id: "bulgarianSplitSquat", name: "Болгарские выпады", movementPattern: MovementPatternCatalog.lunge, isBuiltIn: true)
     ]
+
+    public static func exercise(id: String) -> Exercise? {
+        all.first { $0.id == id }
+    }
 }

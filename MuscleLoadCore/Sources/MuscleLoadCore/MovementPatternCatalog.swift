@@ -169,4 +169,8 @@ public enum MovementPatternCatalog {
         overheadPressStanding, tricepExtensionCable, tricepExtensionLying,
         lateralRaise, backExtension, lunge
     ]
+
+    public static func pattern(id: String) -> MovementPattern? {
+        all.first { $0.id == id }
+    }
 }
