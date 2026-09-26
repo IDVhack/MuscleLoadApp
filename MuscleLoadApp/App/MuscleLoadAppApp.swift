@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 @main
 struct MuscleLoadAppApp: App {
@@ -6,5 +7,11 @@ struct MuscleLoadAppApp: App {
         WindowGroup {
             RootTabView()
         }
+        .modelContainer(for: [
+            WorkoutSessionRecord.self,
+            SetEntryRecord.self,
+            CustomExerciseRecord.self,
+            UserProfileRecord.self
+        ])
     }
 }
