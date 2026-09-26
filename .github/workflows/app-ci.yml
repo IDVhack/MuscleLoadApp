@@ -65,3 +65,45 @@ jobs:
         run: |
           TAIL=$(tail -n 25 /tmp/xcodebuild.log | tr '\n' '|' | cut -c1-800)
           echo "::error::xcodebuild tail: $TAIL"
+
+  archive:
+    needs: test
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Select latest available Xcode
+        run: |
+          set -eo pipefail
+          LATEST_XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -n1)
+          sudo xcode-select -s "$LATEST_XCODE"
+          xcodebuild -version
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        run: xcodegen generate
+      - name: Archive (unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project MuscleLoadApp.xcodeproj \
+            -scheme MuscleLoadApp \
+            -archivePath build/MuscleLoadApp.xcarchive \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee /tmp/archive.log
+      - name: Package IPA
+        run: |
+          mkdir -p build/Payload
+          cp -r build/MuscleLoadApp.xcarchive/Products/Applications/MuscleLoadApp.app build/Payload/
+          cd build && zip -r MuscleLoadApp.ipa Payload
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MuscleLoadApp-ipa
+          path: build/MuscleLoadApp.ipa
+      - name: Report archive failure detail
+        if: failure()
+        run: |
+          TAIL=$(tail -n 25 /tmp/archive.log 2>/dev/null | tr '\n' '|' | cut -c1-800)
+          echo "::error::xcodebuild archive tail: $TAIL"
