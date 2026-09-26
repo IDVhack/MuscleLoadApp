@@ -14,6 +14,7 @@ targets:
     sources:
       - path: MuscleLoadApp/App
       - path: MuscleLoadApp/Navigation
+      - path: MuscleLoadApp/Persistence
     dependencies:
       - package: MuscleLoadCore
     settings:
