@@ -90,6 +90,24 @@ final class WorkoutBuilderViewModelTests: XCTestCase {
         XCTAssertEqual(Set(summary.exerciseNames), Set([squat.name, curl.name]))
     }
 
+    func test_finish_calledTwice_doesNotCreateSecondSession() throws {
+        let context = try makeInMemoryContext()
+        let viewModel = WorkoutBuilderViewModel(modelContext: context)
+        let squat = ExerciseCatalog.exercise(id: "barbellSquat")!
+
+        viewModel.start()
+        viewModel.addSet(exercise: squat, weightKg: 80, reps: 8)
+        viewModel.finish(perceivedEffort: 7)
+
+        var sessions = try context.fetch(FetchDescriptor<WorkoutSessionRecord>())
+        XCTAssertEqual(sessions.count, 1)
+
+        viewModel.finish(perceivedEffort: 7)
+
+        sessions = try context.fetch(FetchDescriptor<WorkoutSessionRecord>())
+        XCTAssertEqual(sessions.count, 1)
+    }
+
     func test_reset_returnsToIdleAndClearsDrafts() throws {
         let context = try makeInMemoryContext()
         let viewModel = WorkoutBuilderViewModel(modelContext: context)

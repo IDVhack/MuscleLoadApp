@@ -18,6 +18,11 @@ struct ActiveWorkoutView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            .onDelete { indexSet in
+                for index in indexSet {
+                    viewModel.removeSet(id: viewModel.draftSets[index].id)
+                }
+            }
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {

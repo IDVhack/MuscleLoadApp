@@ -63,7 +63,7 @@ final class WorkoutBuilderViewModel {
     /// per draft set, numbering sets per exercise (not globally), then moves
     /// to the summary phase.
     func finish(perceivedEffort: Int) {
-        guard let startDate else { return }
+        guard phase == .active, let startDate else { return }
         let duration = Date().timeIntervalSince(startDate)
 
         let session = WorkoutSessionRecord(date: startDate, duration: duration, perceivedEffort: perceivedEffort)

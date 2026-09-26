@@ -26,10 +26,11 @@ struct SetEntrySheet: View {
                         .keyboardType(.numberPad)
                 }
                 Button("Сохранить подход") {
-                    let weight = Double(weightText) ?? 0
+                    let weight = parseDecimal(weightText) ?? 0
                     let reps = Int(repsText) ?? 0
                     onSave(weight, reps)
                 }
+                .disabled((Int(repsText) ?? 0) <= 0)
             }
             .navigationTitle("Подход")
         }
@@ -43,23 +44,31 @@ struct SetEntrySheet: View {
         }
     }
 
+    private func parseDecimal(_ text: String) -> Double? {
+        Double(text.replacingOccurrences(of: ",", with: "."))
+    }
+
+    private func formatWeight(_ value: Double) -> String {
+        value.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(value)) : String(value)
+    }
+
     private func prefillIfNeeded() {
         guard isBodyweightExercise else { return }
         let repository = WorkoutRepository(modelContext: modelContext)
         guard let profile = try? repository.fetchOrCreateProfile() else { return }
         if let bodyweightKg = profile.bodyweightKg {
-            weightText = String(Int(bodyweightKg))
+            weightText = formatWeight(bodyweightKg)
         } else {
             showingBodyweightPrompt = true
         }
     }
 
     private func saveBodyweight() {
-        guard let value = Double(bodyweightInput) else { return }
+        guard let value = parseDecimal(bodyweightInput) else { return }
         let repository = WorkoutRepository(modelContext: modelContext)
         guard let profile = try? repository.fetchOrCreateProfile() else { return }
         profile.bodyweightKg = value
         try? modelContext.save()
-        weightText = String(Int(value))
+        weightText = formatWeight(value)
     }
 }
