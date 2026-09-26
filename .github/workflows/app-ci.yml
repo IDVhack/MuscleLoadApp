@@ -51,3 +51,8 @@ jobs:
             tail -n 150 /tmp/xcodebuild.log
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Report xcodebuild failure detail
+        if: failure()
+        run: |
+          TAIL=$(tail -n 25 /tmp/xcodebuild.log | tr '\n' '|' | cut -c1-800)
+          echo "::error::xcodebuild tail: $TAIL"
