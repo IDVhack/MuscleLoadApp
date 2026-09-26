@@ -7,3 +7,4 @@ DerivedData/
 .DS_Store
 *.xcodeproj
 xcuserdata/
+session-export-*.zip
