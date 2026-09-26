@@ -68,10 +68,15 @@ public static func exercise(id: String) -> Exercise? {
 - Таргет `MuscleLoadAppTests` — unit-тесты (SwiftData-модели, слой-мост
   к MuscleLoadCore).
 
-`.github/workflows/app-ci.yml`: раннер `macos-14`, шаги — checkout,
-установка XcodeGen (`brew install xcodegen`), `xcodegen generate`,
-`xcodebuild test -scheme MuscleLoadApp -destination 'platform=iOS
-Simulator,name=iPhone 15'`.
+`.github/workflows/app-ci.yml`: раннер `macos-14`, шаги — checkout, выбор
+самой новой установленной Xcode (нужна раннеру, чтобы открыть проект в
+формате, который генерирует свежий XcodeGen), установка XcodeGen
+(`brew install xcodegen`), `xcodegen generate`, динамический выбор
+доступного симулятора iPhone через `xcrun simctl` (жёстко заданное имя
+модели не гарантированно существует на раннере), затем `xcodebuild test
+-scheme MuscleLoadApp -destination "platform=iOS Simulator,name=$DEVICE"`.
+Обнаружено и закреплено при реализации Plan B1 (Task 2) — детали в
+[плане](../plans/2026-09-26-ios-foundation.md).
 
 ## 5. Хранение (SwiftData)
 
