@@ -113,4 +113,31 @@ final class WorkoutRepositoryTests: XCTestCase {
         XCTAssertNotNil(biceps)
         XCTAssertLessThan(biceps!.recoveryPercent, 100)
     }
+
+    func test_fetchOrCreateProfile_createsOneWhenNoneExists() throws {
+        let context = try makeInMemoryContext()
+        let repository = WorkoutRepository(modelContext: context)
+
+        let profile = try repository.fetchOrCreateProfile()
+
+        XCTAssertNil(profile.bodyweightKg)
+        XCTAssertEqual(profile.notificationsEnabled, true)
+
+        let descriptor = FetchDescriptor<UserProfileRecord>()
+        XCTAssertEqual(try context.fetch(descriptor).count, 1)
+    }
+
+    func test_fetchOrCreateProfile_returnsExistingWhenPresent() throws {
+        let context = try makeInMemoryContext()
+        let existing = UserProfileRecord(bodyweightKg: 78.5)
+        context.insert(existing)
+        try context.save()
+        let repository = WorkoutRepository(modelContext: context)
+
+        let profile = try repository.fetchOrCreateProfile()
+
+        XCTAssertEqual(profile.bodyweightKg, 78.5)
+        let descriptor = FetchDescriptor<UserProfileRecord>()
+        XCTAssertEqual(try context.fetch(descriptor).count, 1)
+    }
 }

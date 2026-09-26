@@ -63,4 +63,19 @@ struct WorkoutRepository {
 
         return RecoveryEngine().recoveryStatus(asOf: date, sessions: sessions)
     }
+
+    /// Returns the single app-wide user profile, creating an empty one on
+    /// first use. There is exactly one profile record; nothing else in this
+    /// app inserts a `UserProfileRecord`.
+    func fetchOrCreateProfile() throws -> UserProfileRecord {
+        var descriptor = FetchDescriptor<UserProfileRecord>()
+        descriptor.fetchLimit = 1
+        if let existing = try modelContext.fetch(descriptor).first {
+            return existing
+        }
+        let profile = UserProfileRecord()
+        modelContext.insert(profile)
+        try modelContext.save()
+        return profile
+    }
 }
