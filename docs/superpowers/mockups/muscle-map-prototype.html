@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Карта мышц</title>
+<style>
+  :root {
+    --bg: #f4f2fb; --card-bg: #ffffff; --text: #1c1b29; --text-muted: #6b6880;
+    --status-early: #e0524a; --status-soon: #e8b23d; --status-ready: #4caf82;
+    --neutral: #e3c9a8; --outline: #2a1c12; --seam: #2a1c12;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17151f; --card-bg: #221f2e; --text: #ede9f7; --text-muted: #9691ad;
+      --neutral: #6b5138; --outline: #120b07; --seam: #120b07;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #17151f; --card-bg: #221f2e; --text: #ede9f7; --text-muted: #9691ad;
+    --neutral: #6b5138; --outline: #120b07; --seam: #120b07;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    display: flex; flex-direction: column; align-items: center; padding: 24px 16px 40px;
+  }
+  h1 { font-size: 18px; font-weight: 600; margin: 0 0 4px; text-align: center; }
+  p.hint { color: var(--text-muted); font-size: 12px; margin: 0 0 18px; text-align: center; max-width: 440px; }
+  .card { background: var(--card-bg); border-radius: 20px; padding: 18px 10px 14px; max-width: 480px; width: 100%; }
+  .figures { display: flex; justify-content: center; gap: 4px; }
+  .figure-block { text-align: center; }
+  .figure-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .legend { display: flex; justify-content: center; gap: 18px; margin-top: 16px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .controls { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; justify-content: center; }
+  button {
+    font-family: inherit; font-size: 13px; padding: 8px 14px; border-radius: 10px;
+    border: 1px solid var(--outline); background: var(--card-bg); color: var(--text); cursor: pointer;
+  }
+  button:hover { opacity: 0.85; }
+  .region { transition: fill 0.25s ease; }
+  .silhouette { fill: none; stroke: var(--outline); stroke-width: 2; stroke-linejoin: round; }
+  .seamline { fill: none; stroke: var(--seam); stroke-width: 0.8; opacity: 0.5; }
+  .neutral-part { fill: var(--neutral); stroke: var(--outline); stroke-width: 1.5; }
+</style>
+</head>
+<body>
+  <h1>Карта восстановления мышц — прототип v4</h1>
+  <p class="hint">Пропорции и форма мышц исправлены по референсу: узкая талия, V-спина, раздельные ягодицы, сегментированный пресс.</p>
+
+  <div class="card">
+    <div class="figures">
+
+      <!-- ============ FRONT ============ -->
+      <div class="figure-block">
+        <svg viewBox="0 0 240 560" width="188" height="439">
+          <defs>
+            <clipPath id="clipChestF" clipPathUnits="userSpaceOnUse"><rect x="0" y="0" width="240" height="150"/></clipPath>
+            <clipPath id="clipAbsF" clipPathUnits="userSpaceOnUse"><rect x="0" y="150" width="240" height="400"/></clipPath>
+            <clipPath id="clipUpperArm" clipPathUnits="userSpaceOnUse"><rect x="0" y="0" width="240" height="236"/></clipPath>
+            <clipPath id="clipLowerArm" clipPathUnits="userSpaceOnUse"><rect x="0" y="236" width="240" height="340"/></clipPath>
+            <clipPath id="clipUpperLeg" clipPathUnits="userSpaceOnUse"><rect x="0" y="0" width="240" height="430"/></clipPath>
+            <clipPath id="clipLowerLeg" clipPathUnits="userSpaceOnUse"><rect x="0" y="430" width="240" height="340"/></clipPath>
+          </defs>
+
+          <ellipse class="neutral-part" cx="120" cy="30" rx="18" ry="22"/>
+          <path class="neutral-part" d="M 111 48 L 111 64 L 129 64 L 129 48 Z"/>
+
+          <!-- TORSO: chest (wide) tapering to narrow waist -->
+          <path class="region" id="f-chest" clip-path="url(#clipChestF)"
+            d="M 120 66 C 136 66 148 72 154 84 C 159 96 157 108 150 118 C 145 125 140 130 133 138
+               C 128 150 126 165 124 180 C 123 195 124 210 126 222 C 128 232 130 240 128 248
+               C 126 254 122 258 120 258 C 118 258 114 254 112 248 C 110 240 112 232 114 222
+               C 116 210 117 195 116 180 C 114 165 112 150 107 138 C 100 130 95 125 90 118
+               C 83 108 81 96 86 84 C 92 72 104 66 120 66 Z"/>
+          <path class="region" id="f-abs" clip-path="url(#clipAbsF)"
+            d="M 120 66 C 136 66 148 72 154 84 C 159 96 157 108 150 118 C 145 125 140 130 133 138
+               C 128 150 126 165 124 180 C 123 195 124 210 126 222 C 128 232 130 240 128 248
+               C 126 254 122 258 120 258 C 118 258 114 254 112 248 C 110 240 112 232 114 222
+               C 116 210 117 195 116 180 C 114 165 112 150 107 138 C 100 130 95 125 90 118
+               C 83 108 81 96 86 84 C 92 72 104 66 120 66 Z"/>
+          <path class="silhouette"
+            d="M 120 66 C 136 66 148 72 154 84 C 159 96 157 108 150 118 C 145 125 140 130 133 138
+               C 128 150 126 165 124 180 C 123 195 124 210 126 222 C 128 232 130 240 128 248
+               C 126 254 122 258 120 258 C 118 258 114 254 112 248 C 110 240 112 232 114 222
+               C 116 210 117 195 116 180 C 114 165 112 150 107 138 C 100 130 95 125 90 118
+               C 83 108 81 96 86 84 C 92 72 104 66 120 66 Z"/>
+          <!-- ab segment lines (linea alba + 3 tendinous intersections) -->
+          <path class="seamline" d="M 120 148 L 120 256 M 108 168 L 132 168 M 107 190 L 133 190 M 108 212 L 132 212 M 109 234 L 131 234"/>
+          <path class="seamline" d="M 120 66 L 120 118"/>
+
+          <!-- ARMS -->
+          <path class="region" id="f-biceps-r" clip-path="url(#clipUpperArm)"
+            d="M 172 84 C 184 90 190 104 186 122 C 183 138 177 150 172 160 C 176 174 180 192 176 210
+               C 173 224 168 234 158 236 C 148 232 144 220 146 204 C 144 186 146 168 152 154
+               C 146 140 144 124 150 106 C 154 92 162 82 172 84 Z"/>
+          <path class="region" id="f-forearms-r" clip-path="url(#clipLowerArm)"
+            d="M 172 84 C 184 90 190 104 186 122 C 183 138 177 150 172 160 C 176 174 180 192 176 210
+               C 173 224 168 234 158 236 C 148 232 144 220 146 204 C 144 186 146 168 152 154
+               C 146 140 144 124 150 106 C 154 92 162 82 172 84 Z"/>
+          <path class="silhouette"
+            d="M 172 84 C 184 90 190 104 186 122 C 183 138 177 150 172 160 C 176 174 180 192 176 210
+               C 173 224 168 234 158 236 C 148 232 144 220 146 204 C 144 186 146 168 152 154
+               C 146 140 144 124 150 106 C 154 92 162 82 172 84 Z"/>
+          <path class="seamline" d="M 148 232 L 187 224"/>
+
+          <path class="region" id="f-biceps-l" clip-path="url(#clipUpperArm)"
+            d="M 68 84 C 56 90 50 104 54 122 C 57 138 63 150 68 160 C 64 174 60 192 64 210
+               C 67 224 72 234 82 236 C 92 232 96 220 94 204 C 96 186 94 168 88 154
+               C 94 140 96 124 90 106 C 86 92 78 82 68 84 Z"/>
+          <path class="region" id="f-forearms-l" clip-path="url(#clipLowerArm)"
+            d="M 68 84 C 56 90 50 104 54 122 C 57 138 63 150 68 160 C 64 174 60 192 64 210
+               C 67 224 72 234 82 236 C 92 232 96 220 94 204 C 96 186 94 168 88 154
+               C 94 140 96 124 90 106 C 86 92 78 82 68 84 Z"/>
+          <path class="silhouette"
+            d="M 68 84 C 56 90 50 104 54 122 C 57 138 63 150 68 160 C 64 174 60 192 64 210
+               C 67 224 72 234 82 236 C 92 232 96 220 94 204 C 96 186 94 168 88 154
+               C 94 140 96 124 90 106 C 86 92 78 82 68 84 Z"/>
+          <path class="seamline" d="M 92 232 L 53 224"/>
+
+          <ellipse class="region" id="f-shoulders-r" cx="166" cy="96" rx="24" ry="22"/>
+          <ellipse class="region" id="f-shoulders-l" cx="74" cy="96" rx="24" ry="22"/>
+          <ellipse class="silhouette" cx="166" cy="96" rx="24" ry="22"/>
+          <ellipse class="silhouette" cx="74" cy="96" rx="24" ry="22"/>
+
+          <ellipse class="neutral-part" cx="163" cy="250" rx="10" ry="14"/>
+          <ellipse class="neutral-part" cx="77" cy="250" rx="10" ry="14"/>
+
+          <!-- LEGS: quads (teardrop, wide hip -> narrow knee) -->
+          <path class="region" id="f-quads-r" clip-path="url(#clipUpperLeg)"
+            d="M 156 262 C 168 278 172 320 166 368 C 162 400 155 424 146 432 C 140 437 134 434 132 424
+               C 130 408 132 386 130 362 C 128 338 126 310 128 288 C 130 272 140 262 156 262 Z"/>
+          <path class="region" id="f-calves-r" clip-path="url(#clipLowerLeg)"
+            d="M 156 262 C 168 278 172 320 166 368 C 162 400 155 424 146 432 C 140 437 134 434 132 424
+               C 130 408 132 386 130 362 C 128 338 126 310 128 288 C 130 272 140 262 156 262 Z"/>
+          <path class="silhouette"
+            d="M 156 262 C 168 278 172 320 166 368 C 162 400 155 424 146 432 C 140 437 134 434 132 424
+               C 130 408 132 386 130 362 C 128 338 126 310 128 288 C 130 272 140 262 156 262 Z"/>
+
+          <path class="region" id="f-quads-l" clip-path="url(#clipUpperLeg)"
+            d="M 84 262 C 72 278 68 320 74 368 C 78 400 85 424 94 432 C 100 437 106 434 108 424
+               C 110 408 108 386 110 362 C 112 338 114 310 112 288 C 110 272 100 262 84 262 Z"/>
+          <path class="region" id="f-calves-l" clip-path="url(#clipLowerLeg)"
+            d="M 84 262 C 72 278 68 320 74 368 C 78 400 85 424 94 432 C 100 437 106 434 108 424
+               C 110 408 108 386 110 362 C 112 338 114 310 112 288 C 110 272 100 262 84 262 Z"/>
+          <path class="silhouette"
+            d="M 84 262 C 72 278 68 320 74 368 C 78 400 85 424 94 432 C 100 437 106 434 108 424
+               C 110 408 108 386 110 362 C 112 338 114 310 112 288 C 110 272 100 262 84 262 Z"/>
+          <path class="seamline" d="M 128 420 L 172 428 M 112 420 L 68 428"/>
+
+          <path class="region" id="f-adductors" d="M 112 268 C 107 300 107 360 114 418 L 126 418 C 133 360 133 300 128 268 Z"/>
+          <path class="silhouette" d="M 112 268 C 107 300 107 360 114 418 L 126 418 C 133 360 133 300 128 268 Z"/>
+
+          <ellipse class="neutral-part" cx="142" cy="448" rx="17" ry="10"/>
+          <ellipse class="neutral-part" cx="98" cy="448" rx="17" ry="10"/>
+        </svg>
+        <div class="figure-label">спереди</div>
+      </div>
+
+      <!-- ============ BACK ============ -->
+      <div class="figure-block">
+        <svg viewBox="0 0 240 560" width="188" height="439">
+          <defs>
+            <clipPath id="clipUpperBackF" clipPathUnits="userSpaceOnUse"><rect x="0" y="0" width="240" height="152"/></clipPath>
+            <clipPath id="clipUpperArmB" clipPathUnits="userSpaceOnUse"><rect x="0" y="0" width="240" height="236"/></clipPath>
+            <clipPath id="clipLowerArmB" clipPathUnits="userSpaceOnUse"><rect x="0" y="236" width="240" height="340"/></clipPath>
+            <clipPath id="clipUpperLegB" clipPathUnits="userSpaceOnUse"><rect x="0" y="0" width="240" height="430"/></clipPath>
+            <clipPath id="clipLowerLegB" clipPathUnits="userSpaceOnUse"><rect x="0" y="430" width="240" height="340"/></clipPath>
+          </defs>
+
+          <ellipse class="neutral-part" cx="120" cy="30" rx="18" ry="22"/>
+          <path class="neutral-part" d="M 111 48 L 111 64 L 129 64 L 129 48 Z"/>
+
+          <!-- UPPER BACK: traps + lats, flares WIDER than shoulders (V-taper) -->
+          <path class="region" id="b-upperback" clip-path="url(#clipUpperBackF)"
+            d="M 120 66 C 136 66 148 72 154 84 C 159 96 158 108 152 118 C 148 128 150 140 156 150
+               C 160 160 158 172 150 182 C 145 190 142 198 140 205 C 145 200 155 195 155 195
+               L 120 205
+               L 85 195
+               C 85 195 95 200 100 205 C 98 198 95 190 90 182 C 82 172 80 160 84 150
+               C 90 140 92 128 88 118 C 82 108 81 96 86 84 C 92 72 104 66 120 66 Z"/>
+          <path class="silhouette"
+            d="M 120 66 C 136 66 148 72 154 84 C 159 96 158 108 152 118 C 148 128 150 140 156 150
+               C 160 160 158 172 150 182 C 146 192 143 200 140 207 L 120 214 L 100 207
+               C 97 200 94 192 90 182 C 82 172 80 160 84 150
+               C 90 140 92 128 88 118 C 82 108 81 96 86 84 C 92 72 104 66 120 66 Z"/>
+          <path class="seamline" d="M 120 66 L 120 130"/>
+
+          <!-- LOWER BACK: two narrow columns flanking spine, plus a sacrum wedge -->
+          <path class="region" id="b-lowerback-l"
+            d="M 114 150 C 107 168 106 186 110 202 L 119 202 C 121 186 121 168 119 150 Z"/>
+          <path class="region" id="b-lowerback-r"
+            d="M 126 150 C 133 168 134 186 130 202 L 121 202 C 119 186 119 168 121 150 Z"/>
+          <path class="silhouette" d="M 114 150 C 107 168 106 186 110 202 L 119 202 C 121 186 121 168 119 150 Z"/>
+          <path class="silhouette" d="M 126 150 C 133 168 134 186 130 202 L 121 202 C 119 186 119 168 121 150 Z"/>
+
+          <!-- GLUTES: two rounded mounds, pulled apart with more outward bulge -->
+          <path class="region" id="b-glutes-l"
+            d="M 118 200 C 100 198 82 204 72 218 C 62 232 62 252 74 264 C 86 274 104 276 118 270
+               C 122 262 122 246 120 232 C 119 220 118 210 118 200 Z"/>
+          <path class="region" id="b-glutes-r"
+            d="M 122 200 C 140 198 158 204 168 218 C 178 232 178 252 166 264 C 154 274 136 276 122 270
+               C 118 262 118 246 120 232 C 121 220 122 210 122 200 Z"/>
+          <path class="silhouette"
+            d="M 118 200 C 100 198 82 204 72 218 C 62 232 62 252 74 264 C 86 274 104 276 118 270
+               C 122 262 122 246 120 232 C 121 220 122 210 122 200
+               C 122 210 118 220 120 232 C 118 246 118 262 122 270
+               C 136 276 154 274 166 264 C 178 252 178 232 168 218 C 158 204 140 198 122 200 Z"/>
+          <!-- sacrum wedge: dips between the two mounds, same color as lowerback -->
+          <path class="region" id="b-sacrum" d="M 108 198 L 132 198 L 120 234 Z"/>
+          <path class="silhouette" d="M 108 198 L 132 198 L 120 234 Z"/>
+
+          <!-- ARMS: triceps -->
+          <path class="region" id="b-triceps-r" clip-path="url(#clipUpperArmB)"
+            d="M 172 84 C 184 90 190 104 186 122 C 183 138 177 150 172 160 C 176 174 180 192 176 210
+               C 173 224 168 234 158 236 C 148 232 144 220 146 204 C 144 186 146 168 152 154
+               C 146 140 144 124 150 106 C 154 92 162 82 172 84 Z"/>
+          <path class="region" id="b-forearms-r" clip-path="url(#clipLowerArmB)"
+            d="M 172 84 C 184 90 190 104 186 122 C 183 138 177 150 172 160 C 176 174 180 192 176 210
+               C 173 224 168 234 158 236 C 148 232 144 220 146 204 C 144 186 146 168 152 154
+               C 146 140 144 124 150 106 C 154 92 162 82 172 84 Z"/>
+          <path class="silhouette"
+            d="M 172 84 C 184 90 190 104 186 122 C 183 138 177 150 172 160 C 176 174 180 192 176 210
+               C 173 224 168 234 158 236 C 148 232 144 220 146 204 C 144 186 146 168 152 154
+               C 146 140 144 124 150 106 C 154 92 162 82 172 84 Z"/>
+          <path class="seamline" d="M 148 232 L 187 224"/>
+
+          <path class="region" id="b-triceps-l" clip-path="url(#clipUpperArmB)"
+            d="M 68 84 C 56 90 50 104 54 122 C 57 138 63 150 68 160 C 64 174 60 192 64 210
+               C 67 224 72 234 82 236 C 92 232 96 220 94 204 C 96 186 94 168 88 154
+               C 94 140 96 124 90 106 C 86 92 78 82 68 84 Z"/>
+          <path class="region" id="b-forearms-l" clip-path="url(#clipLowerArmB)"
+            d="M 68 84 C 56 90 50 104 54 122 C 57 138 63 150 68 160 C 64 174 60 192 64 210
+               C 67 224 72 234 82 236 C 92 232 96 220 94 204 C 96 186 94 168 88 154
+               C 94 140 96 124 90 106 C 86 92 78 82 68 84 Z"/>
+          <path class="silhouette"
+            d="M 68 84 C 56 90 50 104 54 122 C 57 138 63 150 68 160 C 64 174 60 192 64 210
+               C 67 224 72 234 82 236 C 92 232 96 220 94 204 C 96 186 94 168 88 154
+               C 94 140 96 124 90 106 C 86 92 78 82 68 84 Z"/>
+          <path class="seamline" d="M 92 232 L 53 224"/>
+
+          <ellipse class="region" id="b-shoulders-r" cx="166" cy="96" rx="24" ry="22"/>
+          <ellipse class="region" id="b-shoulders-l" cx="74" cy="96" rx="24" ry="22"/>
+          <ellipse class="silhouette" cx="166" cy="96" rx="24" ry="22"/>
+          <ellipse class="silhouette" cx="74" cy="96" rx="24" ry="22"/>
+
+          <ellipse class="neutral-part" cx="163" cy="250" rx="10" ry="14"/>
+          <ellipse class="neutral-part" cx="77" cy="250" rx="10" ry="14"/>
+
+          <!-- LEGS: hamstrings -->
+          <path class="region" id="b-hamstrings-r" clip-path="url(#clipUpperLegB)"
+            d="M 156 262 C 168 278 172 320 166 368 C 162 400 155 424 146 432 C 140 437 134 434 132 424
+               C 130 408 132 386 130 362 C 128 338 126 310 128 288 C 130 272 140 262 156 262 Z"/>
+          <path class="region" id="b-calves-r" clip-path="url(#clipLowerLegB)"
+            d="M 156 262 C 168 278 172 320 166 368 C 162 400 155 424 146 432 C 140 437 134 434 132 424
+               C 130 408 132 386 130 362 C 128 338 126 310 128 288 C 130 272 140 262 156 262 Z"/>
+          <path class="silhouette"
+            d="M 156 262 C 168 278 172 320 166 368 C 162 400 155 424 146 432 C 140 437 134 434 132 424
+               C 130 408 132 386 130 362 C 128 338 126 310 128 288 C 130 272 140 262 156 262 Z"/>
+
+          <path class="region" id="b-hamstrings-l" clip-path="url(#clipUpperLegB)"
+            d="M 84 262 C 72 278 68 320 74 368 C 78 400 85 424 94 432 C 100 437 106 434 108 424
+               C 110 408 108 386 110 362 C 112 338 114 310 112 288 C 110 272 100 262 84 262 Z"/>
+          <path class="region" id="b-calves-l" clip-path="url(#clipLowerLegB)"
+            d="M 84 262 C 72 278 68 320 74 368 C 78 400 85 424 94 432 C 100 437 106 434 108 424
+               C 110 408 108 386 110 362 C 112 338 114 310 112 288 C 110 272 100 262 84 262 Z"/>
+          <path class="silhouette"
+            d="M 84 262 C 72 278 68 320 74 368 C 78 400 85 424 94 432 C 100 437 106 434 108 424
+               C 110 408 108 386 110 362 C 112 338 114 310 112 288 C 110 272 100 262 84 262 Z"/>
+          <path class="seamline" d="M 128 420 L 172 428 M 112 420 L 68 428"/>
+
+          <ellipse class="neutral-part" cx="142" cy="448" rx="17" ry="10"/>
+          <ellipse class="neutral-part" cx="98" cy="448" rx="17" ry="10"/>
+        </svg>
+        <div class="figure-label">сзади</div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><span class="dot" style="background: var(--status-early)"></span>рано</div>
+      <div class="legend-item"><span class="dot" style="background: var(--status-soon)"></span>можно</div>
+      <div class="legend-item"><span class="dot" style="background: var(--status-ready)"></span>готово</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button onclick="applyPreset('afterLegDay')">После дня ног</button>
+    <button onclick="applyPreset('afterPush')">После жимового дня</button>
+    <button onclick="applyPreset('allReady')">Всё готово</button>
+    <button onclick="applyPreset('mixed')">Смешанное состояние</button>
+  </div>
+
+  <script>
+    const regionIds = {
+      shoulders: ['f-shoulders-l', 'f-shoulders-r', 'b-shoulders-l', 'b-shoulders-r'],
+      biceps: ['f-biceps-l', 'f-biceps-r'],
+      triceps: ['b-triceps-l', 'b-triceps-r'],
+      chest: ['f-chest'],
+      upperBack: ['b-upperback'],
+      lowerBack: ['b-lowerback-l', 'b-lowerback-r', 'b-sacrum'],
+      absCore: ['f-abs'],
+      glutes: ['b-glutes-l', 'b-glutes-r'],
+      quadriceps: ['f-quads-l', 'f-quads-r'],
+      hamstrings: ['b-hamstrings-l', 'b-hamstrings-r'],
+      adductors: ['f-adductors'],
+      calves: ['f-calves-l', 'f-calves-r', 'b-calves-l', 'b-calves-r'],
+      forearms: ['f-forearms-l', 'f-forearms-r', 'b-forearms-l', 'b-forearms-r']
+    };
+    const statusColor = { early: 'var(--status-early)', soon: 'var(--status-soon)', ready: 'var(--status-ready)' };
+    function paint(statusMap) {
+      for (const muscle in regionIds) {
+        const color = statusColor[statusMap[muscle] || 'ready'];
+        regionIds[muscle].forEach(id => { const el = document.getElementById(id); if (el) el.style.fill = color; });
+      }
+    }
+    const presets = {
+      afterLegDay: { quadriceps:'early', glutes:'early', hamstrings:'early', adductors:'soon', calves:'soon', lowerBack:'soon', chest:'ready', shoulders:'ready', biceps:'ready', triceps:'ready', upperBack:'ready', absCore:'ready', forearms:'ready' },
+      afterPush: { chest:'early', shoulders:'early', triceps:'soon', absCore:'soon', biceps:'ready', upperBack:'ready', lowerBack:'ready', glutes:'ready', quadriceps:'ready', hamstrings:'ready', adductors:'ready', calves:'ready', forearms:'ready' },
+      allReady: { shoulders:'ready', biceps:'ready', triceps:'ready', chest:'ready', upperBack:'ready', lowerBack:'ready', absCore:'ready', glutes:'ready', quadriceps:'ready', hamstrings:'ready', adductors:'ready', calves:'ready', forearms:'ready' },
+      mixed: { shoulders:'soon', biceps:'ready', triceps:'early', chest:'early', upperBack:'soon', lowerBack:'ready', absCore:'ready', glutes:'early', quadriceps:'soon', hamstrings:'early', adductors:'ready', calves:'ready', forearms:'soon' }
+    };
+    function applyPreset(name) { paint(presets[name]); }
+    applyPreset('mixed');
+  </script>
+</body>
+</html>
