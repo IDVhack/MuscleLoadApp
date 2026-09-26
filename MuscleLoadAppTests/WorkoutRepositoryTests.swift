@@ -20,7 +20,7 @@ final class WorkoutRepositoryTests: XCTestCase {
         let context = try makeInMemoryContext()
         let repository = WorkoutRepository(modelContext: context)
 
-        let exercise = repository.resolveExercise(id: "barbellSquat")
+        let exercise = try repository.resolveExercise(id: "barbellSquat")
 
         XCTAssertEqual(exercise?.name, "Приседания со штангой")
         XCTAssertEqual(exercise?.movementPattern.id, "squat")
@@ -32,7 +32,7 @@ final class WorkoutRepositoryTests: XCTestCase {
         context.insert(custom)
         let repository = WorkoutRepository(modelContext: context)
 
-        let exercise = repository.resolveExercise(id: "myCurl")
+        let exercise = try repository.resolveExercise(id: "myCurl")
 
         XCTAssertEqual(exercise?.name, "Мой подъём")
         XCTAssertEqual(exercise?.movementPattern.id, "bicepCurl")
@@ -43,7 +43,7 @@ final class WorkoutRepositoryTests: XCTestCase {
         let context = try makeInMemoryContext()
         let repository = WorkoutRepository(modelContext: context)
 
-        XCTAssertNil(repository.resolveExercise(id: "doesNotExist"))
+        XCTAssertNil(try repository.resolveExercise(id: "doesNotExist"))
     }
 
     func test_currentRecoveryStatuses_reflectsPersistedSession() throws {
@@ -72,5 +72,45 @@ final class WorkoutRepositoryTests: XCTestCase {
 
         XCTAssertEqual(statuses.count, 13)
         XCTAssertTrue(statuses.allSatisfy { $0.recoveryPercent == 100 })
+    }
+
+    func test_currentRecoveryStatuses_dropsSetsWithUnresolvableExercise() throws {
+        let context = try makeInMemoryContext()
+        let session = WorkoutSessionRecord(date: .now, duration: 3600)
+        let goodSet = SetEntryRecord(exerciseID: "barbellSquat", weightKg: 80, reps: 8, setNumber: 1)
+        let badSet = SetEntryRecord(exerciseID: "deletedExercise", weightKg: 50, reps: 10, setNumber: 2)
+        goodSet.session = session
+        badSet.session = session
+        session.sets = [goodSet, badSet]
+        context.insert(session)
+        try context.save()
+
+        let repository = WorkoutRepository(modelContext: context)
+        let statuses = try repository.currentRecoveryStatuses(asOf: .now)
+
+        XCTAssertEqual(statuses.count, 13)
+        let quadriceps = statuses.first { $0.muscleGroup == .quadriceps }
+        XCTAssertNotNil(quadriceps)
+        XCTAssertLessThan(quadriceps!.recoveryPercent, 100)
+    }
+
+    func test_currentRecoveryStatuses_resolvesCustomExerciseThroughFullPath() throws {
+        let context = try makeInMemoryContext()
+        let custom = CustomExerciseRecord(id: "myCurl", name: "Мой подъём", movementPatternID: "bicepCurl")
+        context.insert(custom)
+
+        let session = WorkoutSessionRecord(date: .now, duration: 3600)
+        let set = SetEntryRecord(exerciseID: "myCurl", weightKg: 15, reps: 10, setNumber: 1)
+        set.session = session
+        session.sets = [set]
+        context.insert(session)
+        try context.save()
+
+        let repository = WorkoutRepository(modelContext: context)
+        let statuses = try repository.currentRecoveryStatuses(asOf: .now)
+
+        let biceps = statuses.first { $0.muscleGroup == .biceps }
+        XCTAssertNotNil(biceps)
+        XCTAssertLessThan(biceps!.recoveryPercent, 100)
     }
 }

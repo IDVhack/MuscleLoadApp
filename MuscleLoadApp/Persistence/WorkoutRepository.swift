@@ -8,7 +8,7 @@ struct WorkoutRepository {
     /// Resolves an exercise id to its `MuscleLoadCore.Exercise` value —
     /// built-in exercises come from `ExerciseCatalog`, custom ones are
     /// rehydrated from `CustomExerciseRecord` through the pattern catalog.
-    func resolveExercise(id: String) -> Exercise? {
+    func resolveExercise(id: String) throws -> Exercise? {
         if let builtIn = ExerciseCatalog.exercise(id: id) {
             return builtIn
         }
@@ -18,7 +18,7 @@ struct WorkoutRepository {
             predicate: #Predicate { $0.id == targetID }
         )
         guard
-            let record = try? modelContext.fetch(descriptor).first,
+            let record = try modelContext.fetch(descriptor).first,
             let pattern = MovementPatternCatalog.pattern(id: record.movementPatternID)
         else {
             return nil
@@ -42,9 +42,9 @@ struct WorkoutRepository {
         let descriptor = FetchDescriptor<WorkoutSessionRecord>()
         let records = try modelContext.fetch(descriptor)
 
-        let sessions: [WorkoutSession] = records.map { record in
-            let sets: [SetEntry] = record.sets.compactMap { setRecord in
-                guard let exercise = resolveExercise(id: setRecord.exerciseID) else { return nil }
+        let sessions: [WorkoutSession] = try records.map { record in
+            let sets: [SetEntry] = try record.sets.compactMap { setRecord in
+                guard let exercise = try resolveExercise(id: setRecord.exerciseID) else { return nil }
                 return SetEntry(
                     id: setRecord.id,
                     exercise: exercise,
