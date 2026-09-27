@@ -63,8 +63,13 @@ jobs:
       - name: Report xcodebuild failure detail
         if: failure()
         run: |
-          TAIL=$(tail -n 25 /tmp/xcodebuild.log | tr '\n' '|' | cut -c1-800)
-          echo "::error::xcodebuild tail: $TAIL"
+          ERRORS=$(grep -n "error:" /tmp/xcodebuild.log | head -n 10)
+          if [ -n "$ERRORS" ]; then
+            echo "::error::xcodebuild errors: $(echo "$ERRORS" | tr '\n' '|' | cut -c1-1500)"
+          else
+            TAIL=$(tail -n 25 /tmp/xcodebuild.log | tr '\n' '|' | cut -c1-800)
+            echo "::error::xcodebuild tail (no 'error:' line found): $TAIL"
+          fi
 
   archive:
     needs: test
