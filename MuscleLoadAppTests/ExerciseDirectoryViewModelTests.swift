@@ -60,6 +60,16 @@ final class ExerciseDirectoryViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.filteredExercises.contains { $0.id == "legPress" })
     }
 
+    func test_filteredExercises_withNoMatchingSearchText_isEmpty() throws {
+        let context = try makeInMemoryContext()
+        let viewModel = ExerciseDirectoryViewModel(repository: WorkoutRepository(modelContext: context))
+        viewModel.load()
+
+        viewModel.searchText = "zzz-no-such-exercise-zzz"
+
+        XCTAssertTrue(viewModel.filteredExercises.isEmpty)
+    }
+
     func test_filteredExercises_includesCustomExercise() throws {
         let context = try makeInMemoryContext()
         let repository = WorkoutRepository(modelContext: context)

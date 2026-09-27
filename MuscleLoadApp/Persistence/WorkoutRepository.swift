@@ -49,7 +49,9 @@ struct WorkoutRepository {
     func allExercises() throws -> [Exercise] {
         let customRecords = try modelContext.fetch(FetchDescriptor<CustomExerciseRecord>())
         let customExercises = customRecords.compactMap(exercise(from:))
-        return (ExerciseCatalog.all + customExercises).sorted { $0.name < $1.name }
+        return (ExerciseCatalog.all + customExercises).sorted {
+            $0.name.localizedStandardCompare($1.name) == .orderedAscending
+        }
     }
 
     /// Creates and persists a new custom exercise. `movementPatternID` must

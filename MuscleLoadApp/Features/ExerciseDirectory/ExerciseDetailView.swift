@@ -76,8 +76,12 @@ struct ExerciseDetailView: View {
             try repository.deleteCustomExercise(id: exercise.id)
             onChange()
             dismiss()
-        } catch {
+        } catch WorkoutRepositoryError.exerciseInUse {
             showingInUseAlert = true
+        } catch {
+            // Matches this codebase's existing convention (WorkoutBuilderViewModel.finish,
+            // ExerciseFormView.save) of not surfacing rare SwiftData persistence
+            // failures to the user — only the expected "in use" case gets an alert.
         }
     }
 }

@@ -22,7 +22,9 @@ struct ExerciseFormView: View {
     }
 
     private var sortedPatterns: [MovementPattern] {
-        MovementPatternCatalog.all.sorted { $0.name < $1.name }
+        MovementPatternCatalog.all.sorted {
+            $0.name.localizedStandardCompare($1.name) == .orderedAscending
+        }
     }
 
     private var isNameValid: Bool {
