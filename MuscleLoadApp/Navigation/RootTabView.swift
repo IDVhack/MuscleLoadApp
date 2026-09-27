@@ -18,7 +18,7 @@ struct RootTabView: View {
                 .tabItem { Label("Тренировки", systemImage: "figure.strengthtraining.traditional") }
                 .tag(1)
 
-            Text("Упражнения")
+            ExerciseDirectoryView(modelContext: modelContext)
                 .tabItem { Label("Упражнения", systemImage: "list.bullet") }
                 .tag(2)
         }
