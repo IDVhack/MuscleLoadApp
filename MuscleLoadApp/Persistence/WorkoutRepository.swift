@@ -2,6 +2,11 @@ import Foundation
 import SwiftData
 import MuscleLoadCore
 
+enum WorkoutRepositoryError: Error, Equatable {
+    case exerciseInUse
+    case unknownMovementPattern
+}
+
 struct WorkoutRepository {
     let modelContext: ModelContext
 
@@ -17,13 +22,17 @@ struct WorkoutRepository {
         let descriptor = FetchDescriptor<CustomExerciseRecord>(
             predicate: #Predicate { $0.id == targetID }
         )
-        guard
-            let record = try modelContext.fetch(descriptor).first,
-            let pattern = MovementPatternCatalog.pattern(id: record.movementPatternID)
-        else {
+        guard let record = try modelContext.fetch(descriptor).first else { return nil }
+        return exercise(from: record)
+    }
+
+    /// Rehydrates a `CustomExerciseRecord` into `MuscleLoadCore.Exercise`,
+    /// resolving its movement pattern from the fixed catalog. Returns nil if
+    /// the record references a pattern id no longer in `MovementPatternCatalog`.
+    private func exercise(from record: CustomExerciseRecord) -> Exercise? {
+        guard let pattern = MovementPatternCatalog.pattern(id: record.movementPatternID) else {
             return nil
         }
-
         return Exercise(
             id: record.id,
             name: record.name,
@@ -32,6 +41,73 @@ struct WorkoutRepository {
             techniqueDescription: record.techniqueDescription,
             imageAssetName: record.imageAssetName
         )
+    }
+
+    /// Every exercise available to the user — built-in catalog entries plus
+    /// all persisted custom exercises — sorted by name so the directory and
+    /// the workout-logging picker show one consistent, alphabetical list.
+    func allExercises() throws -> [Exercise] {
+        let customRecords = try modelContext.fetch(FetchDescriptor<CustomExerciseRecord>())
+        let customExercises = customRecords.compactMap(exercise(from:))
+        return (ExerciseCatalog.all + customExercises).sorted { $0.name < $1.name }
+    }
+
+    /// Creates and persists a new custom exercise. `movementPatternID` must
+    /// be one of `MovementPatternCatalog.all` — the create form only offers
+    /// those ids, but this is validated defensively at the repository
+    /// boundary rather than trusted blindly.
+    func createCustomExercise(name: String, movementPatternID: String, techniqueDescription: String?) throws -> Exercise {
+        guard MovementPatternCatalog.pattern(id: movementPatternID) != nil else {
+            throw WorkoutRepositoryError.unknownMovementPattern
+        }
+        let record = CustomExerciseRecord(
+            name: name,
+            movementPatternID: movementPatternID,
+            techniqueDescription: techniqueDescription
+        )
+        modelContext.insert(record)
+        try modelContext.save()
+        return exercise(from: record)!
+    }
+
+    /// Updates an existing custom exercise in place. No-ops if `id` doesn't
+    /// match any `CustomExerciseRecord` (e.g. a built-in id) — the edit form
+    /// never calls this for built-in exercises, so no separate guard is
+    /// surfaced to the caller.
+    func updateCustomExercise(id: String, name: String, movementPatternID: String, techniqueDescription: String?) throws {
+        guard MovementPatternCatalog.pattern(id: movementPatternID) != nil else {
+            throw WorkoutRepositoryError.unknownMovementPattern
+        }
+        let targetID = id
+        let descriptor = FetchDescriptor<CustomExerciseRecord>(
+            predicate: #Predicate { $0.id == targetID }
+        )
+        guard let record = try modelContext.fetch(descriptor).first else { return }
+        record.name = name
+        record.movementPatternID = movementPatternID
+        record.techniqueDescription = techniqueDescription
+        try modelContext.save()
+    }
+
+    /// Deletes a custom exercise, but refuses if any saved `SetEntryRecord`
+    /// still references it — there is no workout-history screen yet to
+    /// explain a set that silently lost its exercise.
+    func deleteCustomExercise(id: String) throws {
+        let targetID = id
+        var usageDescriptor = FetchDescriptor<SetEntryRecord>(
+            predicate: #Predicate { $0.exerciseID == targetID }
+        )
+        usageDescriptor.fetchLimit = 1
+        guard try modelContext.fetch(usageDescriptor).isEmpty else {
+            throw WorkoutRepositoryError.exerciseInUse
+        }
+
+        let recordDescriptor = FetchDescriptor<CustomExerciseRecord>(
+            predicate: #Predicate { $0.id == targetID }
+        )
+        guard let record = try modelContext.fetch(recordDescriptor).first else { return }
+        modelContext.delete(record)
+        try modelContext.save()
     }
 
     /// Loads every persisted workout session, rehydrates it into

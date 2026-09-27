@@ -140,4 +140,98 @@ final class WorkoutRepositoryTests: XCTestCase {
         let descriptor = FetchDescriptor<UserProfileRecord>()
         XCTAssertEqual(try context.fetch(descriptor).count, 1)
     }
+
+    func test_allExercises_includesBuiltInAndCustomSortedByName() throws {
+        let context = try makeInMemoryContext()
+        let custom = CustomExerciseRecord(id: "myCurl", name: "Аааа мой подъём", movementPatternID: "bicepCurl")
+        context.insert(custom)
+        try context.save()
+        let repository = WorkoutRepository(modelContext: context)
+
+        let exercises = try repository.allExercises()
+
+        XCTAssertEqual(exercises.count, 24)
+        XCTAssertEqual(exercises.first?.id, "myCurl")
+    }
+
+    func test_createCustomExercise_persistsAndReturnsExercise() throws {
+        let context = try makeInMemoryContext()
+        let repository = WorkoutRepository(modelContext: context)
+
+        let created = try repository.createCustomExercise(
+            name: "Мой присед",
+            movementPatternID: "squat",
+            techniqueDescription: "Описание"
+        )
+
+        XCTAssertEqual(created.name, "Мой присед")
+        XCTAssertEqual(created.movementPattern.id, "squat")
+        XCTAssertFalse(created.isBuiltIn)
+
+        let stored = try context.fetch(FetchDescriptor<CustomExerciseRecord>())
+        XCTAssertEqual(stored.count, 1)
+        XCTAssertEqual(stored.first?.id, created.id)
+    }
+
+    func test_createCustomExercise_throwsForUnknownMovementPattern() throws {
+        let context = try makeInMemoryContext()
+        let repository = WorkoutRepository(modelContext: context)
+
+        XCTAssertThrowsError(
+            try repository.createCustomExercise(name: "X", movementPatternID: "doesNotExist", techniqueDescription: nil)
+        ) { error in
+            XCTAssertEqual(error as? WorkoutRepositoryError, .unknownMovementPattern)
+        }
+    }
+
+    func test_updateCustomExercise_changesFields() throws {
+        let context = try makeInMemoryContext()
+        let repository = WorkoutRepository(modelContext: context)
+        let created = try repository.createCustomExercise(name: "Старое имя", movementPatternID: "squat", techniqueDescription: nil)
+
+        try repository.updateCustomExercise(id: created.id, name: "Новое имя", movementPatternID: "bicepCurl", techniqueDescription: "Новая техника")
+
+        let updated = try repository.resolveExercise(id: created.id)
+        XCTAssertEqual(updated?.name, "Новое имя")
+        XCTAssertEqual(updated?.movementPattern.id, "bicepCurl")
+        XCTAssertEqual(updated?.techniqueDescription, "Новая техника")
+    }
+
+    func test_updateCustomExercise_doesNothingForBuiltInID() throws {
+        let context = try makeInMemoryContext()
+        let repository = WorkoutRepository(modelContext: context)
+
+        try repository.updateCustomExercise(id: "barbellSquat", name: "Hacked", movementPatternID: "bicepCurl", techniqueDescription: nil)
+
+        let stillBuiltIn = try repository.resolveExercise(id: "barbellSquat")
+        XCTAssertEqual(stillBuiltIn?.name, "Приседания со штангой")
+    }
+
+    func test_deleteCustomExercise_removesUnusedExercise() throws {
+        let context = try makeInMemoryContext()
+        let repository = WorkoutRepository(modelContext: context)
+        let created = try repository.createCustomExercise(name: "Удали меня", movementPatternID: "squat", techniqueDescription: nil)
+
+        try repository.deleteCustomExercise(id: created.id)
+
+        XCTAssertNil(try repository.resolveExercise(id: created.id))
+    }
+
+    func test_deleteCustomExercise_throwsWhenExerciseIsUsedInASession() throws {
+        let context = try makeInMemoryContext()
+        let repository = WorkoutRepository(modelContext: context)
+        let created = try repository.createCustomExercise(name: "Используется", movementPatternID: "squat", techniqueDescription: nil)
+
+        let session = WorkoutSessionRecord(date: .now, duration: 1800)
+        let set = SetEntryRecord(exerciseID: created.id, weightKg: 50, reps: 10, setNumber: 1)
+        set.session = session
+        session.sets = [set]
+        context.insert(session)
+        try context.save()
+
+        XCTAssertThrowsError(try repository.deleteCustomExercise(id: created.id)) { error in
+            XCTAssertEqual(error as? WorkoutRepositoryError, .exerciseInUse)
+        }
+        XCTAssertNotNil(try repository.resolveExercise(id: created.id))
+    }
 }
