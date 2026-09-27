@@ -8,11 +8,12 @@ struct ExercisePickerView: View {
 
     @State private var searchText = ""
     @State private var selectedExercise: Exercise?
+    @State private var exercises: [Exercise] = []
     @Environment(\.dismiss) private var dismiss
 
     private var filteredExercises: [Exercise] {
-        guard !searchText.isEmpty else { return ExerciseCatalog.all }
-        return ExerciseCatalog.all.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        guard !searchText.isEmpty else { return exercises }
+        return exercises.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
     }
 
     var body: some View {
@@ -23,6 +24,9 @@ struct ExercisePickerView: View {
             }
             .searchable(text: $searchText)
             .navigationTitle("Упражнение")
+            .onAppear {
+                exercises = (try? WorkoutRepository(modelContext: modelContext).allExercises()) ?? []
+            }
             .sheet(item: $selectedExercise) { exercise in
                 SetEntrySheet(exercise: exercise, modelContext: modelContext) { weight, reps in
                     onPick(exercise, weight, reps)
