@@ -29,10 +29,12 @@ final class ExerciseCatalogTests: XCTestCase {
         XCTAssertEqual(pullUp?.movementPattern.id, "verticalPullBodyweight")
     }
 
-    func test_imageAndTechniqueDefaultToNil() {
-        let squat = ExerciseCatalog.all.first { $0.id == "barbellSquat" }
-        XCTAssertNil(squat?.imageAssetName)
-        XCTAssertNil(squat?.techniqueDescription)
+    func test_allBuiltInExercises_haveImageAssetNameMatchingID() {
+        XCTAssertTrue(ExerciseCatalog.all.allSatisfy { $0.imageAssetName == $0.id })
+    }
+
+    func test_allBuiltInExercises_haveNonEmptyTechniqueDescription() {
+        XCTAssertTrue(ExerciseCatalog.all.allSatisfy { !($0.techniqueDescription?.isEmpty ?? true) })
     }
 
     func test_exercise_returnsMatchingExerciseByID() {
